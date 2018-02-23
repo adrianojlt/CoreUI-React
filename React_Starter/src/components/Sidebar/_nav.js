@@ -8,6 +8,16 @@ export default {
         variant: 'info',
         text: 'NEW'
       }
+    },
+    {
+      name: 'Wizard',
+      url: '/wizard',
+      icon: 'icon-drawer'
+    },
+    {
+      name: 'Profiles',
+      url: '/profiles',
+      icon: 'icon-list'
     }
   ]
 };
