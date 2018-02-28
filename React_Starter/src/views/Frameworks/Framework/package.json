@@ -1,0 +1,6 @@
+{
+  "name": "Framework",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./Framework.js"
+}

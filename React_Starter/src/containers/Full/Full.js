@@ -10,6 +10,8 @@ import Footer from '../../components/Footer/';
 import Dashboard from '../../views/Dashboard/';
 import Wizard from '../../views/Wizard';
 import Profiles from '../../views/Profiles';
+import List from '../../views/List';
+import Framework from '../../views/Frameworks/Framework';
 
 class Full extends Component {
   render() {
@@ -25,6 +27,9 @@ class Full extends Component {
                 <Route path="/dashboard" name="Dashboard" component={Dashboard}/>
                 <Route path="/wizard" name="Wizard" component={Wizard}/>
                 <Route path="/profiles" name="Profiles" component={Profiles}/>
+                <Route path="/list" name="List" component={List}/>
+                <Route path="/list/Angular" name="Framework" component={Framework}/>
+                <Route path="/frameworks/:name" name="Framework" component={Framework}/>
                 <Redirect from="/" to="/dashboard"/>
               </Switch>
             </Container>
