@@ -1,0 +1,54 @@
+{
+  "name": "Html",
+  "language": "Typescript",
+  "Version":"1.0",
+  "templateType":"Html",
+  "frameworkPresentRules": [
+    {
+      "ruleType": "fileExtension",
+      "rule": {
+        "fileExtension": ".html",
+		"contentType": "Template"
+      }
+    }
+  ],
+  "templatePreProcessingRules": [
+    {
+      "ruleType": "parameterizedString",
+      "rule": {
+		"pathToTag": "//script[not(@src) and (not(@type) or @type=\"text/javascript\")]",
+        "transformation": "{value}"
+      }
+    },
+    {
+      "ruleType": "parameterizedString",
+      "rule": {
+        "pathToTag": "//script[@src and not(@noscript)]",
+        "attributeName": "src",
+        "transformation": "var src_{hashFile}=new CxJsNS_{hashFile}(\"{value}\"); src_{hashFile}.CxConstr_{hashFile}();",
+		"validationRule": "FileExists",
+        "executionRule": "FileInclude"
+      }
+    },
+    {
+      "ruleType": "parameterizedString",
+      "rule": {
+        "pathToTag": "//iframe[@src]",
+        "attributeName": "src",
+        "transformation": "function iframe___{hashFile}(){}"
+      }
+    },
+    {
+      "ruleType": "parameterizedString",
+      "rule": {
+        "pathToTag": "//iframe[@sandbox]",
+        "attributeName": "sandbox",
+         "transformation": "function iframe___{hashFile}(){}"
+      }
+    }
+  ],
+  "plainCodePreProcessingRules": [],
+  "postAstRules": [],
+  "resolvingRules": [],
+  "dependencyInjection": {}
+}

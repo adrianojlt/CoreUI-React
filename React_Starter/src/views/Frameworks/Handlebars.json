@@ -1,0 +1,66 @@
+{
+  "name": "Handlebars",
+  "language": "Typescript",
+  "Version":"1.0",
+  "templateType":"Html",
+  "frameworkPresentRules": [
+    {
+      "ruleType": "fileExtension",
+      "rule": {
+        "fileExtension": ".hbs",
+        "contentType": "PlainCode"
+      }
+    },
+    {
+      "ruleType": "fileExtension",
+      "rule": {
+        "fileExtension": ".handlebars",
+        "contentType": "PlainCode"
+      }
+    },
+    {
+      "ruleType": "pattern",
+      "rule": {
+        "fileExtension": ".html",
+		"regEx" : "<script [^>]*src\\s*=[^>]*handlebars[^>]*\\.js",
+        "contentType": "Template"
+      }
+    },
+	{
+      "ruleType": "pattern",
+      "rule": {
+        "fileExtension": ".html",
+		"regEx" : "<script [^>]*type\\s*=[^>]*handlebars[^>]*",
+        "contentType": "Template"
+      }
+    }
+  ],
+  "templatePreProcessingRules": [
+    {
+      "ruleType": "grammar",
+      "rule": {
+        "pathToTag": "//script[@id and contains(@type, 'handlebars')]",
+        "pathToGrammar": "HandlebarsGrammarHandler"
+      }
+    }
+  ],
+  "plainCodePreProcessingRules": [ 
+  {
+      "ruleType": "plainCodeGrammar",
+      "rule": {
+        "fileExtension": ".hbs",
+        "pathToGrammar": "HandlebarsGrammarHandler"
+      }
+    },
+	{
+      "ruleType": "plainCodeGrammar",
+      "rule": {
+        "fileExtension": ".handlebars",
+        "pathToGrammar": "HandlebarsGrammarHandler"
+      }
+    }
+  ],
+  "postAstRules": [],
+  "resolvingRules": ["string TEMPLATE_SUFIX = \"_HBTemplate\";\r\n\r\n\/************ Finding html Ids and Classes ************\/\r\nDictionary<CxList, CxList> htmlElementsDictionary = new Dictionary<CxList, CxList>();\r\n\r\n\/\/ Find all html accesses by id name using Jquery\r\nCxList jqueryFindByHtmlElements = All.FindByType(typeof(MethodInvokeExpr)).FindByShortName(\"$\");\r\nforeach(CxList htmlElement in jqueryFindByHtmlElements)\r\n{\r\n\t\/\/ Find all uses of html method from jquery\r\n\tCxList jqueryHtmlMethod = All.FindByType(typeof(MethodInvokeExpr)).FindByShortName(\"html\");\r\n\tforeach(CxList htmlGetters in jqueryHtmlMethod)\r\n\t{\r\n\t\t\/\/ Find all html accesses by id name that are used to get the inner html\r\n\t\tCxList jQueryFindByIdWithHTML = htmlGetters.GetTargetOfMembers() * htmlElement;\r\n\t\r\n\t\t\/\/ Find all id names that are used to find html elements and return its content\r\n\t\tCxList htmlIdsUsedByHtmlMethod = All.FindByType(typeof(Param)).GetParameters(jQueryFindByIdWithHTML);\r\n\t\t\/\/ Find only the html ids which are strings, to be able to generate the function calls (function definitions) to be linked\r\n\t\tCxList htmlIdStringsUsedByHtmlMethod = All.FindByType(typeof(StringLiteral)).FindByFathers(htmlIdsUsedByHtmlMethod);\r\n\t\r\n\t\t\/\/ Finding Handlebars template definitions and store them relating its htmlElementName\r\n\t\tforeach(CxList htmlElementName in htmlIdStringsUsedByHtmlMethod)\r\n\t\t{\r\n\t\t\tchar[] htmlSpecialChars = {'#','.'};\r\n\t\t\tstring elementIdName = htmlElementName.GetName().TrimStart(htmlSpecialChars);\r\n\t\t\t\r\n\t\t\thtmlElementsDictionary.Add(htmlGetters.GetAssignee(), All.FindByShortName(elementIdName + TEMPLATE_SUFIX));\r\n\t\t\tbreak;\r\n\t\t\r\n\t\t}\r\n\t}\r\n}\r\n\r\n\r\n\r\n\/************ Finding Handlebars template transformations ************\/\r\nDictionary<int, CxList> compilersDictionary = new Dictionary<int, CxList>();\r\n\/\/ Find Handlebars.compile\r\nCxList compileMethods = All.FindByType(typeof(MethodInvokeExpr)).FindByName(\"*Handlebars.compile*\");\r\n\r\n\/\/ For each Compile method\r\nforeach(CxList compileMethod in compileMethods)\r\n{\r\n\t\/\/ Find the variables that gather the HandleBars compiler\r\n\tCxList assginedCompilers = compileMethod.GetAssignee();\r\n\t\r\n\t\/\/ For each Compile variable\r\n\tforeach(CxList compilerVariable in assginedCompilers)\r\n\t{\r\n\t\t\/\/ Find the usages of HandleBars compiler\r\n\t\tCxList compilerReferences = All.FindByType(typeof(MethodInvokeExpr)).FindAllReferences(compilerVariable);\r\n\t\t\/\/ TODO: maybe add here all ways of appending html to DOM.\r\n\t\r\n\t\t\/\/ If found an Handlebars compile executing mark it and relate it to a compile \"constructor\"!\r\n\t\tif (compilerReferences.Count > 0) {\r\n\t\t\tMethodInvokeExpr node = compileMethod.TryGetCSharpGraph<MethodInvokeExpr>();\r\n\t\t\tcompilersDictionary.Add(node.NodeId, compilerReferences);\r\n\t\t\tbreak;\r\n\t\t\r\n\t\t}\r\n\t}\r\n}\r\n\r\n\r\n\r\n\/************ Link the Template compilations to their definition ************\/\r\nforeach(var htmlElementVariable in htmlElementsDictionary)\r\n{\t\r\n\t\/\/ Find All usages of the specified html element variable\r\n\tCxList htmlElementUsages = All.FindAllReferences(htmlElementVariable.Key);\r\n\t\r\n\t\/\/ for each compileExecution\r\n\tforeach(var compileExecution in compilersDictionary)\r\n\t{\r\n\t\t\/\/ Get the node from the key\r\n\t\tCxList node = All.FindById(compileExecution.Key);\r\n\t\t\/\/ find parameters in that compile execution which may be the html element variable\r\n\t\tCxList htmlElementAsParamOfCompile = htmlElementUsages.GetParameters(node);\r\n\t\t\r\n\t\t\/\/ if the html element variable is in the compiler arguments add the reference.\r\n\t\tif(htmlElementAsParamOfCompile.Count > 0){\r\n\t\t\tCxList compiledTemplateInvocation = compileExecution.Value;\r\n\t\t\tCxList templateDefinition = htmlElementVariable.Value;\r\n\t\t\t\r\n\t\t\tcompiledTemplateInvocation.addDefinitionTo(templateDefinition);\r\n\t\t\t\r\n\t\t}\r\n\t}\r\n}\r\n"],
+  "dependencyInjection": {}
+}

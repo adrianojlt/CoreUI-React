@@ -11,6 +11,7 @@ import Dashboard from '../../views/Dashboard/';
 import Wizard from '../../views/Wizard';
 import Profiles from '../../views/Profiles';
 import List from '../../views/List';
+import Temp from '../../views/Temp';
 import Framework from '../../views/Frameworks/Framework';
 
 class Full extends Component {
@@ -30,6 +31,7 @@ class Full extends Component {
                 <Route path="/list" name="List" component={List}/>
                 <Route path="/list/Angular" name="Framework" component={Framework}/>
                 <Route path="/frameworks/:name" name="Framework" component={Framework}/>
+                <Route path="/temp" name="Temp" component={Temp}/>
                 <Redirect from="/" to="/dashboard"/>
               </Switch>
             </Container>

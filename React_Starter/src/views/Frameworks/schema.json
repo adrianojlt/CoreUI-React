@@ -1,0 +1,561 @@
+{
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "type": "object",
+    "required": [
+      "frameworkPresentRules",
+      "name",
+      "language",
+      "dependencyInjection",
+      "resolvingRules",
+      "postAstRules",
+      "templatePreProcessingRules",
+      "plainCodePreProcessingRules",
+      "version",
+      "templateType"
+    ],
+    "maxProperties": 11,
+    "properties": {
+      "name": {
+        "type": "string",
+        "title": "Framework Name",
+        "description": "The Framework to be supported",
+        "default": "",
+        "examples": [
+          "Handlebars"
+        ]
+      },
+      "language": {
+        "type": "string",
+        "title": "Language Name",
+        "description": "The Language the Framework is built on",
+        "examples": [
+          "Javascript"
+        ]
+      },
+      "version": {
+        "type": "string",
+        "title": "Json Version",
+        "description": "The version of the current framework configuration",
+        "examples": [
+          "1.0"
+        ],
+        "enum": ["1.0"]
+      },
+      "templateType": {
+        "type": "string",
+        "title": "Template Type",
+        "description": "The kind of template used by the current framework",
+        "examples": [
+          "Html",
+          "Xml",
+          "Json"
+        ],
+        "enum": ["Html"]
+      },
+      "frameworkPresentRules": {
+        "title": "Framework Present Rules",
+        "description": "The list of rules to validate if the framework is present on the project being processed",
+        "type": "array",
+        "items": {
+          "oneOf": [
+            {
+              "$ref": "#/definitions/frameworkPresentfunction"
+            },
+            {
+              "$ref": "#/definitions/pattern"
+            },
+            {
+              "$ref": "#/definitions/fileExtension"
+            }
+          ]
+        }
+      },
+      "templatePreProcessingRules": {
+        "title": "Transformation Rules",
+        "description": "The list of rules to apply to convert the templates into the target language",
+        "type": "array",
+        "items": {
+          "oneOf": [
+            {
+              "$ref": "#/definitions/cSharpFunction"
+            },
+            {
+              "$ref": "#/definitions/grammar"
+            },
+            {
+              "$ref": "#/definitions/parameterizedString"
+            },
+            {
+              "$ref": "#/definitions/regularExpression"
+            }
+          ]
+        }
+      },
+      "plainCodePreProcessingRules": {
+        "title": "Transformation Rules",
+        "description": "The list of rules to apply to convert plain code into the target language",
+        "type": "array",
+        "items": {
+          "oneOf": [
+            {
+              "$ref": "#/definitions/plainCodecSharpFunction"
+            },
+            {
+              "$ref": "#/definitions/plainCodeGrammar"
+            }
+          ]
+        }
+      },
+      "postAstRules": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "title": "Post Ast Rules",
+          "description": "For Future Use"
+        }
+      },
+      "resolvingRules": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "title": "Dynamic Resolving Queries List",
+          "description": "List Of Queries to be used to connect templates with the target code"
+        }
+      },
+      "dependencyInjection": {
+        "type": "object",
+        "title": "The Dependency Injection Object.",
+        "description": "For Future Use"
+      }
+    },
+    "definitions": {
+      "plainCodeGrammar": {
+        "type": "object",
+        "description": "Apply a rule based on a grammar defined on a Custom Dll",
+        "required": [
+          "ruleType",
+          "rule"
+        ],
+        "properties": {
+          "ruleType": {
+            "type": "string",
+            "description": "The available rule types.",
+            "default": "",
+            "enum": [
+              "plainCodeGrammar"
+            ]
+          },
+          "rule": {
+            "type": "object",
+            "required": [
+              "fileExtension",
+              "pathToGrammar"
+            ],
+            "maxProperties": 2,
+            "properties": {
+              "fileExtension": {
+                "type": "string",
+                "description": "The extension of the file to be processed",
+                "default": ""
+              },
+              "pathToGrammar": {
+                "type": "string",
+                "description": "The base dir of the grammar",
+                "default": ""
+              }
+            }
+          }
+        }
+      },
+      "plainCodecSharpFunction": {
+        "type": "object",
+        "description": "Apply a rule based on a function defined on a Custom Dll",
+        "required": [
+          "ruleType",
+          "rule"
+        ],
+        "properties": {
+          "ruleType": {
+            "type": "string",
+            "description": "The available rule types.",
+            "default": "",
+            "enum": [
+              "plainCodecSharpFunction"
+            ]
+          },
+          "rule": {
+            "type": "object",
+            "required": [
+              "fileExtension",
+              "functionName"
+            ],
+            "maxProperties": 2,
+            "properties": {
+              "fileExtension": {
+                "type": "string",
+                "description": "The extension of the file to be processed",
+                "default": ""
+              },
+              "functionName": {
+                "type": "string",
+                "description": "The name of the function to apply",
+                "default": ""
+              }
+            }
+          }
+        }
+      },
+      "cSharpFunction": {
+        "description": "Apply a rule via a Function defined in a Custom Dll",
+        "type": "object",
+        "required": [
+          "ruleType",
+          "rule"
+        ],
+        "properties": {
+          "ruleType": {
+            "type": "string",
+            "description": "The available rule types.",
+            "default": "",
+            "enum": [
+              "cSharpFunction"
+            ]
+          },
+          "rule": {
+            "type": "object",
+            "required": [
+              "pathToTag",
+              "functionName"
+            ],
+            "maxProperties": 3,
+            "properties": {
+              "pathToTag": {
+                "type": "string",
+                "description":
+                  "The xpath of the tag to be searched. If 'attributeName' not filled this is the tag to be processed",
+                "default": ""
+              },
+              "attributeName": {
+                "type": "string",
+                "description": "The attribute to be processed, if needed",
+                "default": ""
+              },
+              "functionName": {
+                "description": "The name of the function to apply",
+                "default": ""
+              },
+              "validationRule": {
+                "type": "string",
+                "description":
+                  "The name of the validation rule to be executed and evaluate if the action should be performed or not.",
+                "default": ""
+              },
+              "executionRule": {
+                "type": "string",
+                "description": "The name of the execution rule to be executed",
+                "default": ""
+              }
+            }
+          }
+        }
+      },
+      "grammar": {
+        "type": "object",
+        "description": "Apply a rule based on a grammar defined on a Custom Dll",
+        "required": [
+          "ruleType",
+          "rule"
+        ],
+        "properties": {
+          "ruleType": {
+            "type": "string",
+            "description": "The available rule types.",
+            "default": "",
+            "enum": [
+              "grammar"
+            ]
+          },
+          "rule": {
+            "type": "object",
+            "required": [
+              "pathToTag",
+              "pathToGrammar"
+            ],
+            "maxProperties": 3,
+            "properties": {
+              "pathToTag": {
+                "type": "string",
+                "description":
+                  "The xpath of the tag to be searched. If 'attributeName' not filled this is the tag to be processed",
+                "default": ""
+              },
+              "attributeName": {
+                "type": "string",
+                "description": "The attribute to be processed, if needed",
+                "default": ""
+              },
+              "pathToGrammar": {
+                "type": "string",
+                "description": "The base dir of the grammar",
+                "default": ""
+              },
+              "validationRule": {
+                "type": "string",
+                "description":
+                  "The name of the validation rule to be executed and evaluate if the action should be performed or not.",
+                "default": ""
+              },
+              "executionRule": {
+                "type": "string",
+                "description": "The name of the execution rule to be executed",
+                "default": ""
+              }
+            }
+          }
+        }
+      },
+      "regularExpression": {
+        "type": "object",
+        "description": "Use a RegEx to transform the contents of a tag",
+        "required": [
+          "ruleType",
+          "rule"
+        ],
+        "properties": {
+          "ruleType": {
+            "type": "string",
+            "description": "The available rule types.",
+            "default": "",
+            "enum": [
+              "regularExpression"
+            ]
+          },
+          "rule": {
+            "type": "object",
+            "required": [
+              "pathToTag",
+              "regEx",
+              "substitution"
+            ],
+            "maxProperties": 6,
+            "properties": {
+              "pathToTag": {
+                "type": "string",
+                "description":
+                  "The xpath of the tag to be searched. If 'attributeName' not filled this is the tag to be processed",
+                "default": ""
+              },
+              "attributeName": {
+                "type": "string",
+                "description": "The attribute to be processed, if needed",
+                "default": ""
+              },
+              "regEx": {
+                "type": "string",
+                "description": "The regular expression to be used to match the content"
+              },
+              "substitution": {
+                "type": "string",
+                "description": "The substitution to be applied",
+                "default": ""
+              },
+              "validationRule": {
+                "type": "string",
+                "description":
+                  "The name of the validation rule to be executed and evaluate if the action should be performed or not.",
+                "default": ""
+              },
+              "executionRule": {
+                "type": "string",
+                "description": "The name of the execution rule to be executed",
+                "default": ""
+              }
+            }
+          }
+        }
+      },
+      "parameterizedString": {
+        "type": "object",
+        "description": "Transform the contents of a tag based on a string",
+        "required": [
+          "ruleType",
+          "rule"
+        ],
+        "properties": {
+          "ruleType": {
+            "type": "string",
+            "description": "The available rule types.",
+            "default": "",
+            "enum": [
+              "parameterizedString"
+            ]
+          },
+          "rule": {
+            "type": "object",
+            "required": [
+              "pathToTag",
+              "transformation"
+            ],
+            "maxProperties": 5,
+            "properties": {
+              "pathToTag": {
+                "type": "string",
+                "description":
+                  "The xpath of the tag to be searched. If 'attributeName' not filled this is the tag to be processed",
+                "default": ""
+              },
+              "attributeName": {
+                "type": "string",
+                "description": "The attribute to be processed, if needed",
+                "default": ""
+              },
+              "transformation": {
+                "type": "string",
+                "description": "The substitution to be applied"
+              },
+              "validationRule": {
+                "type": "string",
+                "description":
+                  "The name of the validation rule to be executed and evaluate if the action should be performed or not.",
+                "default": ""
+              },
+              "executionRule": {
+                "type": "string",
+                "description": "The name of the execution rule to be executed",
+                "default": ""
+              }
+            }
+          }
+        }
+      },
+      "pattern": {
+        "type": "object",
+        "description": "Use a RegEx to test if a framework is present.",
+        "required": [
+          "ruleType",
+          "rule"
+        ],
+        "properties": {
+          "ruleType": {
+            "type": "string",
+            "description": "The available rule types.",
+            "default": "",
+            "enum": [
+              "pattern"
+            ]
+          },
+          "rule": {
+            "type": "object",
+            "required": [
+              "fileExtension",
+              "regEx",
+              "contentType"
+            ],
+            "maxProperties": 3,
+            "properties": {
+              "fileExtension": {
+                "type": "string",
+                "description": "The extension of the file to be processed",
+                "default": ""
+              },
+              "regEx": {
+                "type": "string",
+                "description": "The regular expression to test if a framework is present"
+              },
+              "contentType": {
+                "description": "The type of content of the file",
+                "enum": [
+                  "PlainCode",
+                  "Template"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "fileExtension": {
+        "type": "object",
+        "description": "Use a file extension to test if a framework is present.",
+        "required": [
+          "ruleType",
+          "rule"
+        ],
+        "properties": {
+          "ruleType": {
+            "type": "string",
+            "description": "The available rule types.",
+            "default": "",
+            "enum": [
+              "fileExtension"
+            ]
+          },
+          "rule": {
+            "type": "object",
+            "required": [
+              "fileExtension",
+              "contentType"
+            ],
+            "maxProperties": 2,
+            "properties": {
+              "fileExtension": {
+                "type": "string",
+                "description": "The extension of the file to be processed",
+                "default": ""
+              },
+              "contentType": {
+                "description": "The type of content of the file",
+                "enum": [
+                  "PlainCode",
+                  "Template"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "frameworkPresentfunction": {
+        "description": "Check if a framework is present via a Function defined in a Custom Dll",
+        "type": "object",
+        "required": [
+          "ruleType",
+          "rule"
+        ],
+        "properties": {
+          "ruleType": {
+            "type": "string",
+            "description": "The available rule types.",
+            "default": "",
+            "enum": [
+              "frameworkPresentfunction"
+            ]
+          },
+          "rule": {
+            "type": "object",
+            "required": [
+              "fileExtension",
+              "functionName",
+              "contentType"
+            ],
+            "maxProperties": 3,
+            "properties": {
+              "fileExtension": {
+                "type": "string",
+                "description": "The extension of the file to be processed",
+                "default": ""
+              },
+              "functionName": {
+                "description": "The name of the function to apply",
+                "default": ""
+              },
+              "contentType": {
+                "description": "The type of content of the file",
+                "enum": [
+                  "PlainCode", "Template"
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  }

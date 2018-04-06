@@ -45,6 +45,11 @@ export default {
           icon: 'icon-puzzle'
         }
       ]
+    },
+    {
+      name: 'Temp',
+      url: '/temp',
+      icon: 'icon-list'
     }
   ]
 };

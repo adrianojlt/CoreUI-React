@@ -4,6 +4,7 @@ const routes = {
   '/wizard': 'Wizard',
   '/list': 'List',
   '/profiles': 'Profiles',
-  '/frameworks': 'Frameworks'
+  '/frameworks': 'Frameworks',
+  '/temp': 'Temp'
 };
 export default routes;
